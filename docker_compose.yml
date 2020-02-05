@@ -1,0 +1,49 @@
+version: '3.4'
+
+volumes:
+  modal-nodes_mysql:
+    external: true
+
+networks:
+  traefik:
+    external: true
+  phpmyadmin:
+    external: true
+
+services:
+  wordpress:
+    image: modalnodes/images:{{image_name}}
+    networks:
+      - default
+      - traefik
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      labels:
+        - "traefik.docker.network=traefik"
+        - "traefik.frontend.rule=Host:${FRONT_DOMAIN}"
+        - "traefik.port=80"
+    environment:
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - {{volume_name}}:/var/lib/mysql
+    networks:
+      - default
+      - phpmyadmin
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == flexo
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
