@@ -1,7 +1,7 @@
 version: '3.4'
 
 volumes:
-  modal-nodes_mysql:
+  ${VOLUME_NAME}:
     external: true
 
 networks:
@@ -12,7 +12,7 @@ networks:
 
 services:
   wordpress:
-    image: modalnodes/images:{{image_name}}
+    image: modalnodes/images:${IMAGE_NAME}
     networks:
       - default
       - traefik
@@ -32,7 +32,7 @@ services:
   mysql:
     image: mysql:5.7
     volumes:
-      - {{volume_name}}:/var/lib/mysql
+      - ${VOLUME_NAME}:/var/lib/mysql
     networks:
       - default
       - phpmyadmin
